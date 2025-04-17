@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Box, Grid3X3, Layers, LayoutGrid, Maximize2, Droplet } from "lucide-react";
+import VerticalFarmModel from "./VerticalFarmModel";
 
 const DigitalTwin = () => {
   const [activeView, setActiveView] = useState("3d");
@@ -96,27 +97,24 @@ const DigitalTwin = () => {
             <div className="bg-gray-50 rounded-xl border border-gray-100 w-full h-[500px] flex items-center justify-center relative">
               {activeView === "3d" && (
                 <div className="relative w-full h-full">
-                  <img 
-                    src="https://images.unsplash.com/photo-1626278664285-f796b9ee7806?q=80&w=3174&auto=format&fit=crop" 
-                    alt="Vertical Farm Digital Twin" 
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-xl"></div>
-                  <div className="absolute bottom-4 left-4 text-white">
+                  {/* Replace static image with interactive 3D model */}
+                  <VerticalFarmModel className="w-full h-full" />
+                  
+                  <div className="absolute bottom-4 left-4 text-gray-800 bg-white/70 p-2 rounded-md">
                     <p className="font-semibold">Digital Twin Visualization</p>
-                    <p className="text-sm text-white/80">Interactive 3D model with real-time data</p>
+                    <p className="text-sm text-gray-600">Interactive 3D model with real-time data</p>
                   </div>
 
                   <Button className="absolute top-3 right-3 rounded-full h-8 w-8 p-0" variant="outline">
                     <Maximize2 className="h-4 w-4" />
                   </Button>
 
-                  {/* Sample data points */}
+                  {/* Sample data points - maintained for information overlay */}
                   <div className="absolute top-1/4 left-1/3 w-8 h-8 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center cursor-pointer hover:bg-green-500/30 transition-colors">
-                    <Box className="h-4 w-4 text-white" />
+                    <Box className="h-4 w-4 text-green-700" />
                   </div>
                   <div className="absolute top-1/2 right-1/4 w-8 h-8 rounded-full bg-blue-500/20 border-2 border-blue-500 flex items-center justify-center cursor-pointer hover:bg-blue-500/30 transition-colors">
-                    <Droplet className="h-4 w-4 text-white" />
+                    <Droplet className="h-4 w-4 text-blue-700" />
                   </div>
                 </div>
               )}
