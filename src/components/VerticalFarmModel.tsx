@@ -1,12 +1,20 @@
-
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
+import { useSoilMoisture } from "@/hooks/useSoilMoisture";
+
+// Helper function to get color based on moisture level
+const getMoistureColor = (level: number) => {
+  if (level < 50) return "#ff4444"; // Too dry - red
+  if (level > 80) return "#4444ff"; // Too wet - blue
+  return "#44ff44"; // Good - green
+};
 
 // Component for a single growing rack with multiple shelves
-const GrowingRack = ({ position = [0, 0, 0], color = "#66BB6A" }) => {
+const GrowingRack = ({ position = [0, 0, 0], rackId }: { position: [number, number, number], rackId: string }) => {
   const frame = useRef<THREE.Group>(null);
+  const moistureData = useSoilMoisture();
   
   // Dimensions
   const width = 2;
@@ -37,6 +45,11 @@ const GrowingRack = ({ position = [0, 0, 0], color = "#66BB6A" }) => {
       {/* Shelves with plants */}
       {Array.from({ length: shelvesCount }).map((_, i) => {
         const y = -height/2 + (i+0.5) * (height/shelvesCount);
+        const shelfId = `shelf-${i + 1}`;
+        const moistureInfo = moistureData.find(
+          (data) => data.rack_id === rackId && data.shelf_id === shelfId
+        );
+        
         return (
           <group key={i} position={[0, y, 0]}>
             {/* Shelf */}
@@ -45,13 +58,15 @@ const GrowingRack = ({ position = [0, 0, 0], color = "#66BB6A" }) => {
               <meshStandardMaterial color={"#aaa"} />
             </mesh>
             
-            {/* Plants (represented by green boxes) */}
+            {/* Plants (represented by boxes with moisture-based colors) */}
             {Array.from({ length: 3 }).map((_, j) => {
               const x = (j - 1) * (width/3);
               return (
                 <mesh key={j} position={[x, 0.2, 0]} castShadow>
                   <boxGeometry args={[0.4, 0.3, 0.4]} />
-                  <meshStandardMaterial color={color} />
+                  <meshStandardMaterial 
+                    color={moistureInfo ? getMoistureColor(moistureInfo.moisture_level) : "#66BB6A"}
+                  />
                 </mesh>
               );
             })}
@@ -65,6 +80,20 @@ const GrowingRack = ({ position = [0, 0, 0], color = "#66BB6A" }) => {
                 emissiveIntensity={0.5} 
               />
             </mesh>
+
+            {/* Moisture level indicator */}
+            {moistureInfo && (
+              <group position={[width/2 + 0.2, 0, 0]}>
+                <mesh>
+                  <boxGeometry args={[0.1, 0.4, 0.1]} />
+                  <meshStandardMaterial color={getMoistureColor(moistureInfo.moisture_level)} />
+                </mesh>
+                <mesh position={[0.15, 0, 0]}>
+                  <planeGeometry args={[0.3, 0.2]} />
+                  <meshBasicMaterial color="#ffffff" />
+                </mesh>
+              </group>
+            )}
           </group>
         );
       })}
@@ -78,7 +107,6 @@ const VerticalFarm = () => {
   
   useFrame(() => {
     if (group.current) {
-      // Very subtle automatic rotation for better visualization
       group.current.rotation.y += 0.001;
     }
   });
@@ -86,12 +114,12 @@ const VerticalFarm = () => {
   return (
     <group ref={group}>
       {/* Multiple growing racks arranged in a grid */}
-      <GrowingRack position={[-2.5, 0, -1]} color={"#66BB6A"} />
-      <GrowingRack position={[0, 0, -1]} color={"#81C784"} />
-      <GrowingRack position={[2.5, 0, -1]} color={"#66BB6A"} />
-      <GrowingRack position={[-2.5, 0, 1]} color={"#81C784"} />
-      <GrowingRack position={[0, 0, 1]} color={"#66BB6A"} />
-      <GrowingRack position={[2.5, 0, 1]} color={"#81C784"} />
+      <GrowingRack position={[-2.5, 0, -1]} rackId="rack-1" />
+      <GrowingRack position={[0, 0, -1]} rackId="rack-2" />
+      <GrowingRack position={[2.5, 0, -1]} rackId="rack-3" />
+      <GrowingRack position={[-2.5, 0, 1]} rackId="rack-4" />
+      <GrowingRack position={[0, 0, 1]} rackId="rack-5" />
+      <GrowingRack position={[2.5, 0, 1]} rackId="rack-6" />
       
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
