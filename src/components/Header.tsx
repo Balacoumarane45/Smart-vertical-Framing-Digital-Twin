@@ -2,12 +2,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Leaf } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -25,7 +41,11 @@ const Header = () => {
           <a href="#digital-twin" className="text-gray-700 hover:text-green-600 transition-colors font-medium">Digital Twin</a>
           <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors font-medium">Features</a>
           <a href="#contact" className="text-gray-700 hover:text-green-600 transition-colors font-medium">Contact</a>
-          <Button className="bg-green-600 hover:bg-green-700">Get Started</Button>
+          {user ? (
+            <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
+          ) : (
+            <Button onClick={() => navigate("/auth")} className="bg-green-600 hover:bg-green-700">Sign In</Button>
+          )}
         </nav>
         
         {/* Mobile Navigation Button */}
@@ -46,7 +66,11 @@ const Header = () => {
             <a href="#digital-twin" className="text-gray-700 hover:text-green-600 transition-colors font-medium" onClick={toggleMenu}>Digital Twin</a>
             <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors font-medium" onClick={toggleMenu}>Features</a>
             <a href="#contact" className="text-gray-700 hover:text-green-600 transition-colors font-medium" onClick={toggleMenu}>Contact</a>
-            <Button className="bg-green-600 hover:bg-green-700 w-full">Get Started</Button>
+            {user ? (
+              <Button onClick={handleSignOut} variant="outline" className="w-full">Sign Out</Button>
+            ) : (
+              <Button onClick={() => navigate("/auth")} className="bg-green-600 hover:bg-green-700 w-full">Sign In</Button>
+            )}
           </nav>
         </div>
       )}
